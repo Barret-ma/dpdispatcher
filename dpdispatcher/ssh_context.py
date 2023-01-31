@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os, paramiko, tarfile, time
+import traceback
 import uuid
 import shutil
 import pathlib
@@ -735,13 +736,16 @@ class SSHContext(BaseContext):
 
     def check_file_exists(self, fname):
         assert self.remote_root is not None
+        dlog.info(f"check file exists {fname} remote_root: {self.remote_root}")
         self.ssh_session.ensure_alive()
         try:
             self.sftp.stat(
                 pathlib.PurePath(os.path.join(self.remote_root, fname)).as_posix()
             )
             ret = True
-        except IOError:
+        except IOError as e:
+            dlog.error(f"check sftp stat {self.remote_root} {fname} error: {e}")
+            traceback.print_exc()
             ret = False
         return ret
 

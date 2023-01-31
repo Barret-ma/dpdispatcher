@@ -105,6 +105,7 @@ class Slurm(Machine):
         ret, stdin, stdout, stderr = self.context.block_call(
             'squeue -o "%.18i %.2t" -j ' + job_id
         )
+        dlog.info(f"{job.job_id} ret data: {ret}")
         if ret != 0:
             err_str = stderr.read().decode("utf-8")
             if str("Invalid job id specified") in err_str:
@@ -128,6 +129,7 @@ class Slurm(Machine):
                 % (job_id, err_str, ret)
             )
         status_line = stdout.read().decode("utf-8").split("\n")[-2]
+        dlog.info(f"{job.job_id} status_line data: {status_line}")
         status_word = status_line.split()[-1]
         if not (len(status_line.split()) == 2 and status_word.isupper()):
             raise RuntimeError(
@@ -164,6 +166,7 @@ class Slurm(Machine):
             return JobStatus.unknown
 
     def check_finish_tag(self, job):
+        dlog.info(f"check finish tag {job.job_id} hash data: {job.job_hash}")
         job_tag_finished = job.job_hash + "_job_tag_finished"
         return self.context.check_file_exists(job_tag_finished)
 
